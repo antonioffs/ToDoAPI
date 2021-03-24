@@ -16,8 +16,8 @@ function checksExistsUserAccount(request, response, next) {
   const user = users.find(user => user.username === username);
 
   if(!user){
-    return response.status(400).json({
-      message: "Username Do Not Exists"
+    return response.status(404).json({
+      error: "Username Do Not Exists"
     });
   };
 
@@ -34,20 +34,20 @@ app.post('/users', (request, response) => {
 
   if(userAlreadyExists){
     return response.status(400).json({
-      message: "Username Already Exists"
+      error: "Username Already Exists"
     });
   };
 
-  users.push({
+  new_user = {
     name,
     username,
     id: uuidv4(),
     todos: []
-  });
+  }
 
-  return response.status(201).json({
-    message: "User Created!"
-  });
+  users.push(new_user);
+
+  return response.status(201).json(new_user);
 
 });
 
@@ -73,9 +73,9 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 
   user.todos.push(createTodo);
 
-  return response.status(201).json({
-    message: "To Do Created!"
-  });
+  return response.status(201).json(
+    createTodo
+  );
 
 });
 
@@ -90,12 +90,10 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
     todo.title = title;
     todo.deadline = new Date(deadline);
 
-    return response.status(201).json({
-      message: "Updated data!"
-    });
+    return response.status(201).json(todo);
   }catch{
-    return response.status(400).json({
-      message: "Id not found!"
+    return response.status(404).json({
+      error: "Id not found!"
     });
   };
 
@@ -110,13 +108,11 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 
     todo.done = true;
 
-    return response.status(201).json({
-      message: "ToDo set as Done!"
-    });
+    return response.status(201).json(todo);
 
   }catch{
     return response.status(404).json({
-      message: "Todo not found!"
+      error: "Todo not found!"
     });
 
   };
@@ -130,7 +126,7 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
 
   if (todoIndex === -1){
     return response.status(404).json({
-      message: "Todo not found!"
+      error: "Todo not found!"
     });
   }
 
